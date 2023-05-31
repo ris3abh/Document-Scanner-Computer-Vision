@@ -1,7 +1,7 @@
 clear;
 close all;
 
-inputImage = imread('./images/imagex.jpeg');
+inputImage = imread('../images/imagex.jpeg');
 grayImage = rgb2gray(inputImage);
 edges = edgeDetection(grayImage, 19, 1.13);
 
