@@ -103,7 +103,7 @@ function [numberOfLines, relevantLines] = relevantLineIdentification(houghTransf
     [~, indices] = sort(houghTransformLine(sub2ind([h, w], rows, cols)), 'descend');
     rows = rows(indices);
     cols = cols(indices);
-    numberOfLines = min(11, numel(indices));
+    numberOfLines = min(12, numel(indices));
     relevantLines = [cols(1:numberOfLines), rows(1:numberOfLines)];
 end
 
