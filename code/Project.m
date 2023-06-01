@@ -1,17 +1,18 @@
-clear;
+clear all;
 close all;
 
-image = imread('img.png');
+image = imread('blank.jpeg');
 grayImage = rgb2gray(image);
 
 edgePixels = edgeDetection(grayImage);
 [houghTransformLine, rRange, thetaRange] = houghTransformForLine(edgePixels);
-[relevantLines, numberOfLines] = relevantLineIdentification(houghTransformLine);
-plotTheStatistics(relevantLines, numberOfLines, rRange, thetaRange, image);
+localMaxima = findLocalMaxima(houghTransformLine);
+[numberOfLines, relevantLines] = relevantLineIdentification(houghTransformLine);
+plotTheStatistics(relevantLines, numberOfLines, rRange, thetaRange, image)
 
 function edgePixels = edgeDetection(grayImage)
     k = 13;
-    sigma = 1.23;
+    sigma = 1.59;
     kernel = zeros(k, k);
     center = (k + 1)/2;
     for x = 1:k
@@ -22,7 +23,7 @@ function edgePixels = edgeDetection(grayImage)
     kernel = kernel / sum(kernel(:));
     
     smoothImage = conv2(grayImage, kernel,"valid");
-
+    
     dx = zeros(size(smoothImage));
     dy = zeros(size(smoothImage));
     
@@ -50,6 +51,7 @@ function [houghTransformLine, rRange, thetaRange] = houghTransformForLine(edgePi
     rMax = round(sqrt(w^2 + h^2));
     rRange = -rMax:rMax;
     
+    % Create an empty Hough Transform array
     houghTransformLine = zeros(length(rRange), length(thetaRange));
     
     % Loop over all edge pixels in the binary image
@@ -69,28 +71,39 @@ function [houghTransformLine, rRange, thetaRange] = houghTransformForLine(edgePi
     title('Hough Transform for Line');
 end
 
-function [relevantLines, numberOfLines] = relevantLineIdentification(houghTransformLine)
-    [h, w] = size(houghTransformLine);
-    neighborhood = [0, 1, 0; 1, 1, 1; 0, 1, 0];  % 3x3 neighborhood for comparison
-    localMaxima = zeros(h, w);
+function localMaxima = findLocalMaxima(houghTransform)
+    [rows, cols] = size(houghTransform);
+    localMaxima = false(size(houghTransform));
 
-    for i = 2:h-1
-        for j = 2:w-1
-            neighbors = houghTransformLine(i-1:i+1, j-1:j+1);
-            maxNeighbor = max(neighbors(:));
-            if houghTransformLine(i, j) >= maxNeighbor
-                localMaxima(i, j) = 1;
+    for i = 2:rows-1
+        for j = 2:cols-1
+            pixelValue = houghTransform(i, j);
+
+            % Check if the pixel is greater than its neighbors
+            if pixelValue > houghTransform(i-1, j-1) && ...
+               pixelValue > houghTransform(i-1, j) && ...
+               pixelValue > houghTransform(i-1, j+1) && ...
+               pixelValue > houghTransform(i, j-1) && ...
+               pixelValue > houghTransform(i, j+1) && ...
+               pixelValue > houghTransform(i+1, j-1) && ...
+               pixelValue > houghTransform(i+1, j) && ...
+               pixelValue > houghTransform(i+1, j+1)
+                localMaxima(i, j) = true;
             end
         end
     end
+end
 
-    threshold = 0.513 * max(houghTransformLine(:)); % Adjust the threshold value as needed
-    thresholdedHough = houghTransformLine .* (houghTransformLine >= threshold);
-    [rows, cols] = find(localMaxima & (thresholdedHough > threshold));
+function [numberOfLines, relevantLines] = relevantLineIdentification(houghTransformLine)
+    threshold = 0.6 * max(houghTransformLine(:));
+    [h, w] = size(houghTransformLine);
+    localMaxima = findLocalMaxima(houghTransformLine);
+    linesAboveThreshold = houghTransformLine >= threshold;
+    [rows, cols] = find(localMaxima & (linesAboveThreshold));
     [~, indices] = sort(houghTransformLine(sub2ind([h, w], rows, cols)), 'descend');
     rows = rows(indices);
     cols = cols(indices);
-    numberOfLines = min(9, numel(indices));
+    numberOfLines = min(11, numel(indices));
     relevantLines = [cols(1:numberOfLines), rows(1:numberOfLines)];
 end
 
@@ -127,12 +140,12 @@ function plotTheStatistics(relevantLines, numberOfLines, rRange, thetaRange, ima
         r = rRange(relevantLines(i, 2));
         x = 1:size(image, 2);
         y = (r - x * cos(theta)) / sin(theta);
-        plot(x, y, 'LineWidth', 2, 'Color', 'r');
+        plot(x, y, 'Color', 'r');
     end
 
     % Get corner points
     cornerPoints = getCornerPoints(numberOfLines, relevantLines, rRange, thetaRange);
     
     % Plot corner points
-    plot(cornerPoints(:, 1), cornerPoints(:, 2), 'g*', 'MarkerSize', 10);
+    plot(cornerPoints(:, 1), cornerPoints(:, 2), 'g*', 'MarkerSize', 5);
 end
