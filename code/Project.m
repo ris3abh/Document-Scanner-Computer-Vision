@@ -1,7 +1,7 @@
 clear;
 close all;
 
-inputImage = imread('image.jpeg');
+inputImage = imread('../images/imagex.jpeg');
 
 % Preprocessing steps
 grayImage = rgb2gray(inputImage);
@@ -60,15 +60,8 @@ function [edges, k, sigma] = findOptimumEdges(image)
     sigma = bestSigma;
 end
 
-function edgePixels = edgeDetection(image, k, sigma)
-    kernel = zeros(k, k);
-    center = (k + 1)/2;
-    for x = 1:k
-        for y = 1:k
-            kernel(x, y) = exp(-((x-center)^2 + (y-center)^2) / (2 * sigma^2));
-        end
-    end
-    kernel = kernel / sum(kernel(:));
+function edgePixels = edgeDetection(image, kSize, sigma)
+    kernel = createGaussianKernel(kSize, sigma);
     smoothImage = conv2(image, kernel, 'same');
     dx = zeros(size(smoothImage));
     dy = zeros(size(smoothImage));
