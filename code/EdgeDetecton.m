@@ -1,15 +1,96 @@
 clear;
 close all;
 
-inputImage = imread('../images/imagex.jpeg');
-[edgeImg] = getEdgeImage(inputImage);
-imshow(edgeImg);
-[houghTransformLine, rRange, thetaRange] = houghTransformForLine(edgeImg);
-[numberOfLines, relevantLines] = relevantLineIdentification(houghTransformLine);
-cornerPoints = getCornerPoints(numberOfLines, relevantLines, rRange, thetaRange, size(edgeImg));
-rectifiedImage = rectifyImage(inputImage, cornerPoints);
+inputImage1 = imread('../images/image1.jpeg');
+inputImage2 = imread('../images/image2.jpeg');
+inputImage3 = imread('../images/image3.jpeg');
 
-imshow(rectifiedImage);
+[rectifiedImage1, edgeImg1, cornerPoints1, numberOfLines1, relevantLines1, rRange1, thetaRange1] = imageRectification(inputImage1);
+[rectifiedImage2, edgeImg2, cornerPoints2, numberOfLines2, relevantLines2, rRange2, thetaRange2] = imageRectification(inputImage2);
+[rectifiedImage3, edgeImg3, cornerPoints3, numberOfLines3, relevantLines3, rRange3, thetaRange3] = imageRectification(inputImage3);
+
+figure;
+subplot(3,3,1), imshow(inputImage1), title('sample 1');
+subplot(3,3,2), imshow(inputImage2), title('sample 2');
+subplot(3,3,3), imshow(inputImage3), title('sample 3');
+subplot(3,3,4), imshow(edgeImg1), title('edgeImg for sample 1');
+subplot(3,3,5), imshow(edgeImg2), title('edgeImg for sample 1');
+subplot(3,3,6), imshow(edgeImg3), title('edgeImg for sample 1');
+subplot(3,3,7), imshow(rectifiedImage1), title('rectified image for 1 sample');
+subplot(3,3,8), imshow(rectifiedImage2), title('rectified image for 2 sample');
+subplot(3,3,9), imshow(rectifiedImage3), title('rectified image for 3 sample');
+
+figure;
+subplot(1,3,1);
+imshow(inputImage1);
+hold on;
+for i = 1:numberOfLines1
+    theta = deg2rad(thetaRange1(relevantLines1(i, 1)));
+    r = rRange1(relevantLines1(i, 2));
+    x = 1:size(image, 2);
+    y = (r - x * cos(theta)) / sin(theta);
+    plot(x, y, 'Color', 'r');
+end
+
+plot(cornerPoints1(1, 1), cornerPoints1(1, 2), 'g*', 'MarkerSize', 10)
+plot(cornerPoints1(2, 1), cornerPoints1(2, 2), 'g*', 'MarkerSize', 10)
+plot(cornerPoints1(3, 1), cornerPoints1(3, 2), 'g*', 'MarkerSize', 10)
+plot(cornerPoints1(4, 1), cornerPoints1(4, 2), 'g*', 'MarkerSize', 10)
+text(cornerPoints1(2, 1), cornerPoints1(2, 2), 'Top Right', 'Color', 'r', 'VerticalAlignment', 'bottom', 'HorizontalAlignment', 'left');
+text(cornerPoints1(1, 1), cornerPoints1(1, 2), 'Top Left', 'Color', 'r', 'VerticalAlignment', 'bottom', 'HorizontalAlignment', 'right');
+text(cornerPoints1(3, 1), cornerPoints1(3, 2), 'Bottom Right', 'Color', 'r', 'VerticalAlignment', 'top', 'HorizontalAlignment', 'left');
+text(cornerPoints1(4, 1), cornerPoints1(4, 2), 'Bottom Left', 'Color', 'r', 'VerticalAlignment', 'top', 'HorizontalAlignment', 'right');
+hold off;
+subplot(1,3,2);
+imshow(inputImage2);
+hold on;
+for i = 1:numberOfLines2
+    theta = deg2rad(thetaRange2(relevantLines2(i, 1)));
+    r = rRange2(relevantLines2(i, 2));
+    x = 1:size(image, 2);
+    y = (r - x * cos(theta)) / sin(theta);
+    plot(x, y, 'Color', 'r');
+end
+
+plot(cornerPoints2(1, 1), cornerPoints2(1, 2), 'g*', 'MarkerSize', 10)
+plot(cornerPoints2(2, 1), cornerPoints2(2, 2), 'g*', 'MarkerSize', 10)
+plot(cornerPoints2(3, 1), cornerPoints2(3, 2), 'g*', 'MarkerSize', 10)
+plot(cornerPoints2(4, 1), cornerPoints2(4, 2), 'g*', 'MarkerSize', 10)
+text(cornerPoints2(2, 1), cornerPoints2(2, 2), 'Top Right', 'Color', 'r', 'VerticalAlignment', 'bottom', 'HorizontalAlignment', 'left');
+text(cornerPoints2(1, 1), cornerPoints2(1, 2), 'Top Left', 'Color', 'r', 'VerticalAlignment', 'bottom', 'HorizontalAlignment', 'right');
+text(cornerPoints2(3, 1), cornerPoints2(3, 2), 'Bottom Right', 'Color', 'r', 'VerticalAlignment', 'top', 'HorizontalAlignment', 'left');
+text(cornerPoints2(4, 1), cornerPoints2(4, 2), 'Bottom Left', 'Color', 'r', 'VerticalAlignment', 'top', 'HorizontalAlignment', 'right');
+hold off;
+
+
+subplot(1,3,3);
+imshow(inputImage3);
+hold on;
+for i = 1:numberOfLines3
+    theta = deg2rad(thetaRange3(relevantLines3(i, 1)));
+    r = rRange3(relevantLines3(i, 2));
+    x = 1:size(image, 2);
+    y = (r - x * cos(theta)) / sin(theta);
+    plot(x, y, 'Color', 'r');
+end
+
+plot(cornerPoints3(1, 1), cornerPoints3(1, 2), 'g*', 'MarkerSize', 10)
+plot(cornerPoints3(2, 1), cornerPoints3(2, 2), 'g*', 'MarkerSize', 10)
+plot(cornerPoints3(3, 1), cornerPoints3(3, 2), 'g*', 'MarkerSize', 10)
+plot(cornerPoints3(4, 1), cornerPoints3(4, 2), 'g*', 'MarkerSize', 10)
+text(cornerPoints3(2, 1), cornerPoints3(2, 2), 'Top Right', 'Color', 'r', 'VerticalAlignment', 'bottom', 'HorizontalAlignment', 'left');
+text(cornerPoints3(1, 1), cornerPoints3(1, 2), 'Top Left', 'Color', 'r', 'VerticalAlignment', 'bottom', 'HorizontalAlignment', 'right');
+text(cornerPoints3(3, 1), cornerPoints3(3, 2), 'Bottom Right', 'Color', 'r', 'VerticalAlignment', 'top', 'HorizontalAlignment', 'left');
+text(cornerPoints3(4, 1), cornerPoints3(4, 2), 'Bottom Left', 'Color', 'r', 'VerticalAlignment', 'top', 'HorizontalAlignment', 'right');
+hold off;
+
+function [rectifiedImage, edgeImg, cornerPoints, numberOfLines, relevantLines, rRange, thetaRange] = imageRectification(inputImage)
+    [edgeImg] = getEdgeImage(inputImage);
+    [houghTransformLine, rRange, thetaRange] = houghTransformForLine(edgeImg);
+    [numberOfLines, relevantLines] = relevantLineIdentification(houghTransformLine);
+    cornerPoints = getCornerPoints(numberOfLines, relevantLines, rRange, thetaRange, size(edgeImg));
+    rectifiedImage = rectifyImage(inputImage, cornerPoints);
+end
 
 function rectifiedImage = rectifyImage(inputImage, cornerPoints)
     paperWidth = 8.5;
